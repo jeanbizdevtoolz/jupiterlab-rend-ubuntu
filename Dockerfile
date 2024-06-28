@@ -16,15 +16,15 @@ RUN apt-get update && apt-get install -y \
 # Set the working directory
 WORKDIR /app
 
-# Upgrade pip and install JupyterLab
+# Upgrade pip and install JupyterLab and notebook
 RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 install --no-cache-dir jupyterlab notebook
 
-# Generate JupyterLab password hash
-RUN python3 -c "from notebook.auth import passwd; print(passwd('&j#mpT8tyBpe[z[7E+k('))" > /root/.jupyter/jupyter_passwd.txt
-
 # Create Jupyter configuration directory
 RUN mkdir -p /root/.jupyter
+
+# Generate JupyterLab password hash
+RUN python3 -c "from notebook.auth import passwd; print(passwd('&j#mpT8tyBpe[z[7E+k('))" > /root/.jupyter/jupyter_passwd.txt
 
 # Set Jupyter configuration to require password
 RUN echo "c.NotebookApp.password = open('/root/.jupyter/jupyter_passwd.txt').read().strip()" > /root/.jupyter/jupyter_notebook_config.py
