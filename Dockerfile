@@ -20,8 +20,22 @@ WORKDIR /app
 RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 install --no-cache-dir jupyterlab
 
+# Generate JupyterLab password hash
+RUN pip3 install notebook
+RUN python3 -c "from notebook.auth import passwd; print(passwd('&j#mpT8tyBpe[z[7E+k('))" > /tmp/jupyter_passwd.txt
+
+# Create Jupyter configuration directory
+RUN mkdir -p /root/.jupyter
+
+# Set Jupyter configuration to require password
+RUN echo "c.NotebookApp.password = open('/tmp/jupyter_passwd.txt').read().strip()" > /root/.jupyter/jupyter_notebook_config.py
+RUN echo "c.NotebookApp.open_browser = False" >> /root/.jupyter/jupyter_notebook_config.py
+RUN echo "c.NotebookApp.ip = '0.0.0.0'" >> /root/.jupyter/jupyter_notebook_config.py
+RUN echo "c.NotebookApp.port = 8080" >> /root/.jupyter/jupyter_notebook_config.py
+RUN echo "c.NotebookApp.allow_root = True" >> /root/.jupyter/jupyter_notebook_config.py
+
 # Expose port 8080
 EXPOSE 8080
 
-# Start JupyterLab on port 8080 without authentication
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8080", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
+# Start JupyterLab on port 8080 with authentication
+CMD ["jupyter", "lab"]
